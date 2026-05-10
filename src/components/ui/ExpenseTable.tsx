@@ -1,0 +1,182 @@
+'use client'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { formatCLP } from '@/lib/utils/currency'
+import { deleteExpense } from '@/app/(dashboard)/accounts/[id]/expenses/actions'
+
+interface Expense {
+  id: string
+  date: string
+  merchant: string
+  amount: number
+  currency: string
+  amount_clp: number
+  categories: { id: string; name: string; color: string } | null
+}
+
+interface ExpenseTableProps {
+  expenses: Expense[]
+  accountId: string
+  total: number
+  currentMonth: number
+  currentYear: number
+}
+
+const MONTHS = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+]
+
+export function ExpenseTable({ expenses, accountId, total, currentMonth, currentYear }: ExpenseTableProps) {
+  const router = useRouter()
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const now = new Date()
+  const years = [now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2]
+
+  function handlePeriodChange(month: number, year: number) {
+    router.push(`/accounts/${accountId}?month=${month}&year=${year}`)
+  }
+
+  async function handleDelete() {
+    if (!deleteId) return
+    setIsDeleting(true)
+    await deleteExpense(deleteId, accountId)
+    setIsDeleting(false)
+    setDeleteId(null)
+  }
+
+  return (
+    <div>
+      {/* Selector de período */}
+      <div className="flex gap-2 mb-6">
+        <select
+          value={currentMonth}
+          onChange={e => handlePeriodChange(parseInt(e.target.value), currentYear)}
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          {MONTHS.map((m, i) => (
+            <option key={i} value={i + 1}>{m}</option>
+          ))}
+        </select>
+        <select
+          value={currentYear}
+          onChange={e => handlePeriodChange(currentMonth, parseInt(e.target.value))}
+          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          {years.map(y => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+
+      {expenses.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">
+          <p className="text-lg mb-4">No hay gastos en este período</p>
+          <Link
+            href={`/accounts/${accountId}/expenses/new`}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700 transition-colors"
+          >
+            + Nuevo gasto
+          </Link>
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-gray-600 text-xs uppercase">
+                <tr>
+                  <th className="text-left px-4 py-3">Fecha</th>
+                  <th className="text-left px-4 py-3">Comercio</th>
+                  <th className="text-left px-4 py-3">Categoría</th>
+                  <th className="text-right px-4 py-3">Monto</th>
+                  <th className="text-right px-4 py-3">CLP</th>
+                  <th className="text-center px-4 py-3">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {expenses.map(expense => {
+                  const [y, m, d] = expense.date.split('-')
+                  const dateStr = `${d}/${m}/${y}`
+                  return (
+                    <tr key={expense.id} className="bg-white hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{dateStr}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900">{expense.merchant}</td>
+                      <td className="px-4 py-3">
+                        {expense.categories && (
+                          <span className="inline-flex items-center gap-1.5 text-xs">
+                            <span
+                              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                              style={{ backgroundColor: expense.categories.color }}
+                            />
+                            {expense.categories.name}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-gray-700 whitespace-nowrap">
+                        {expense.amount.toLocaleString('es-CL')} {expense.currency}
+                      </td>
+                      <td className="px-4 py-3 text-right font-medium whitespace-nowrap">
+                        {formatCLP(expense.amount_clp)}
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Link
+                            href={`/accounts/${accountId}/expenses/${expense.id}/edit`}
+                            className="text-gray-400 hover:text-indigo-600 transition-colors"
+                            title="Editar"
+                          >
+                            ✏️
+                          </Link>
+                          <button
+                            onClick={() => setDeleteId(expense.id)}
+                            className="text-gray-400 hover:text-red-600 transition-colors"
+                            title="Eliminar"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-4 flex justify-end">
+            <p className="text-sm text-gray-600">
+              Total del período:{' '}
+              <span className="font-bold text-gray-900 text-base">{formatCLP(total)}</span>
+            </p>
+          </div>
+        </>
+      )}
+
+      {/* Modal de eliminación */}
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+            <h2 className="text-lg font-semibold mb-2">¿Eliminar este gasto?</h2>
+            <p className="text-sm text-gray-600 mb-6">Esta acción no se puede deshacer.</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 bg-red-600 text-white py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-60 transition-colors"
+              >
+                {isDeleting ? 'Eliminando...' : 'Eliminar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
