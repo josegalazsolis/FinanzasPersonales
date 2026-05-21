@@ -8,7 +8,7 @@
 - **Supabase** (PostgreSQL + Auth + RLS) via `@supabase/ssr`
 - **react-day-picker v10** + **date-fns v4** para el date picker
 - **Recharts** para los gráficos de analytics (PieChart, BarChart)
-- **Frankfurter API** (gratuita, sin key) para tipos de cambio
+- **open.er-api.com** (gratuita, sin key, soporta CLP) para tipos de cambio — Frankfurter no soporta CLP
 
 ## Decisiones de arquitectura importantes
 

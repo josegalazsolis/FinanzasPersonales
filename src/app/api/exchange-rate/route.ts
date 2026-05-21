@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   if (!from || from === 'CLP') return NextResponse.json({ rate: 1 })
 
   try {
-    const res = await fetch(`https://api.frankfurter.app/latest?from=${from}&to=CLP`)
+    const res = await fetch(`https://open.er-api.com/v6/latest/${from}`)
     if (!res.ok) throw new Error('API error')
     const data = await res.json()
     if (!data.rates?.CLP) throw new Error('No CLP rate')
