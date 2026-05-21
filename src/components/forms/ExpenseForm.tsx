@@ -134,7 +134,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
         <button
           type="button"
           onClick={() => setShowCalendar(!showCalendar)}
-          className="w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           📅 {format(date, 'dd/MM/yyyy', { locale: es })}
         </button>
@@ -159,7 +159,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
           value={merchant}
           onChange={e => setMerchant(e.target.value)}
           placeholder="Ej: Jumbo, Netflix, Shell"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         {errors.merchant && <p className="text-xs text-red-600 mt-1">{errors.merchant}</p>}
       </div>
@@ -170,7 +170,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
         <select
           value={categoryId}
           onChange={e => setCategoryId(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Seleccionar categoría...</option>
           {categories.map(cat => (
@@ -190,7 +190,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
           min="0"
           step="any"
           placeholder="0"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount}</p>}
       </div>
@@ -201,7 +201,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
         <select
           value={currency}
           onChange={e => setCurrency(e.target.value as Currency)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="CLP">CLP</option>
           <option value="USD">USD</option>

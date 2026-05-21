@@ -25,7 +25,7 @@ export default async function NewExpensePage({ params }: { params: Promise<{ id:
 
   return (
     <div className="max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-2">Nuevo gasto</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Nuevo gasto</h1>
       <p className="text-gray-500 mb-6">{account.name}</p>
       <ExpenseForm accountId={account.id} categories={categories ?? []} />
     </div>
