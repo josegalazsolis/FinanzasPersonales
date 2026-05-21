@@ -7,6 +7,7 @@
 - **React 19.2.4**
 - **Supabase** (PostgreSQL + Auth + RLS) via `@supabase/ssr`
 - **react-day-picker v10** + **date-fns v4** para el date picker
+- **Recharts** para los gráficos de analytics (PieChart, BarChart)
 - **Frankfurter API** (gratuita, sin key) para tipos de cambio
 
 ## Decisiones de arquitectura importantes
@@ -39,12 +40,13 @@ Refrescar PATH después de instalar paquetes: `$env:PATH = [System.Environment]:
 | PRO-10 | Listado de gastos con edición y eliminación | `src/app/(dashboard)/accounts/[id]/page.tsx`, `src/components/ui/ExpenseTable.tsx` |
 | PRO-11 | Configuración de categorías | `src/app/(dashboard)/settings/categories/`, `src/components/forms/CategoriesManager.tsx` |
 | PRO-12 | Navbar responsive (desktop + mobile) | `src/components/ui/Navbar.tsx` |
+| PRO-13 | Dashboard de Analytics (M2) | `src/app/(dashboard)/analytics/page.tsx`, `src/components/analytics/` |
+| PRO-17 | Deploy en Vercel + configuración de producción | Implementado manualmente por el usuario |
 
 ### Pendiente ⏳
-| Issue | Descripción | Bloqueado por |
+| Issue | Descripción | Milestone |
 |---|---|---|
-| — | Push a GitHub | Usuario debe crear repo |
-| — | Deploy en Vercel | Requiere GitHub + credenciales Supabase en Vercel |
+| PRO-18 | Configurar Google OAuth para producción | M3 |
 
 ## Supabase — proyecto activo
 
@@ -116,7 +118,7 @@ El calendario usa variables CSS propias (`.rdp-root`). Overrides en `globals.css
 /accounts/[id]             → gastos de una cuenta (filtro por mes/año)
 /accounts/[id]/expenses/new         → formulario nuevo gasto
 /accounts/[id]/expenses/[id]/edit   → editar gasto existente
-/analytics                 → placeholder "Próximamente M2"
+/analytics                 → dashboard con KPIs, gráficos (donut, temporal, por cuenta), proyección mensual y tabla exportable
 /settings/categories       → gestión de categorías (CRUD)
 /api/exchange-rate         → proxy a Frankfurter API (evita CORS)
 ```
