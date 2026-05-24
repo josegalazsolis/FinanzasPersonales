@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import * as XLSX from 'xlsx'
 import { formatCLP } from '@/lib/utils/currency'
 import type { ExpenseRow } from './types'
 
@@ -42,6 +43,18 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
     return sortDir === 'asc' ? cmp : -cmp
   })
 
+  function buildRows() {
+    return sorted.map(e => ({
+      Fecha: e.date,
+      Comercio: e.merchant,
+      Categoría: e.categories?.name ?? '',
+      Cuenta: e.accounts?.name ?? '',
+      'Monto Original': e.amount,
+      Moneda: e.currency,
+      'Monto CLP': e.amount_clp,
+    }))
+  }
+
   function exportCSV() {
     const header = 'Fecha,Comercio,Categoría,Cuenta,Monto Original,Moneda,Monto CLP'
     const rows = sorted.map(e => [
@@ -53,7 +66,7 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
       e.currency,
       e.amount_clp,
     ].join(','))
-    const csv = [header, ...rows].join('\n')
+    const csv = '﻿' + [header, ...rows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -61,6 +74,13 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
     a.download = 'gastos.csv'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  function exportExcel() {
+    const ws = XLSX.utils.json_to_sheet(buildRows())
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Gastos')
+    XLSX.writeFile(wb, 'gastos.xlsx')
   }
 
   function SortHeader({ label, field }: { label: string; field: SortKey }) {
@@ -82,12 +102,20 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
     <div className="bg-white rounded-xl border border-gray-200">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
         <h2 className="text-base font-semibold text-gray-900">Detalle de gastos</h2>
-        <button
-          onClick={exportCSV}
-          className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
-        >
-          Exportar CSV
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={exportCSV}
+            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+          >
+            CSV
+          </button>
+          <button
+            onClick={exportExcel}
+            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+          >
+            Excel
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

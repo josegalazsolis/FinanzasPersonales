@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import * as XLSX from 'xlsx'
 import { formatCLP } from '@/lib/utils/currency'
 import { deleteExpense } from '@/app/(dashboard)/accounts/[id]/expenses/actions'
 
@@ -38,6 +39,41 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
 
   function handlePeriodChange(month: number, year: number) {
     router.push(`/accounts/${accountId}?month=${month}&year=${year}`)
+  }
+
+  function exportCSV() {
+    const header = 'Fecha,Comercio,Categoría,Monto Original,Moneda,Monto CLP'
+    const rows = expenses.map(e => [
+      e.date,
+      `"${e.merchant}"`,
+      `"${e.categories?.name ?? ''}"`,
+      e.amount,
+      e.currency,
+      e.amount_clp,
+    ].join(','))
+    const csv = '﻿' + [header, ...rows].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'gastos.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  function exportExcel() {
+    const rows = expenses.map(e => ({
+      Fecha: e.date,
+      Comercio: e.merchant,
+      Categoría: e.categories?.name ?? '',
+      'Monto Original': e.amount,
+      Moneda: e.currency,
+      'Monto CLP': e.amount_clp,
+    }))
+    const ws = XLSX.utils.json_to_sheet(rows)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Gastos')
+    XLSX.writeFile(wb, 'gastos.xlsx')
   }
 
   async function handleDelete() {
@@ -144,7 +180,11 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
             </table>
           </div>
 
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex gap-3">
+              <button onClick={exportCSV} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">CSV</button>
+              <button onClick={exportExcel} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">Excel</button>
+            </div>
             <p className="text-sm text-gray-600">
               Total del período:{' '}
               <span className="font-bold text-gray-900 text-base">{formatCLP(total)}</span>

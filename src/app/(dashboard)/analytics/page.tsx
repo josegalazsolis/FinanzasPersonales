@@ -6,6 +6,7 @@ import { CategoryPieChart } from '@/components/analytics/CategoryPieChart'
 import { TemporalBarChart } from '@/components/analytics/TemporalBarChart'
 import { AccountTypeChart } from '@/components/analytics/AccountTypeChart'
 import { MonthlyProjection } from '@/components/analytics/MonthlyProjection'
+import { BudgetProgress } from '@/components/analytics/BudgetProgress'
 import { ExpenseDetailTable } from '@/components/analytics/ExpenseDetailTable'
 import type { ExpenseRow, Period } from '@/components/analytics/types'
 
@@ -22,25 +23,33 @@ function getDateRange(period: Period, customStart?: string, customEnd?: string) 
       const y = d.getFullYear()
       const m = d.getMonth() + 1
       const lastDay = new Date(y, m, 0).getDate()
-      return { startDate: `${y}-${pad(m)}-01`, endDate: `${y}-${pad(m)}-${pad(lastDay)}`, isCurrentMonth: false }
+      return { startDate: `${y}-${pad(m)}-01`, endDate: `${y}-${pad(m)}-${pad(lastDay)}`, isCurrentMonth: false, budgetMonth: m, budgetYear: y }
     }
     case '3_months': {
       const d = new Date(year, month - 4, 1)
-      return { startDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`, endDate: todayStr, isCurrentMonth: false }
+      return { startDate: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-01`, endDate: todayStr, isCurrentMonth: false, budgetMonth: null, budgetYear: null }
     }
     case 'this_year':
-      return { startDate: `${year}-01-01`, endDate: todayStr, isCurrentMonth: false }
+      return { startDate: `${year}-01-01`, endDate: todayStr, isCurrentMonth: false, budgetMonth: null, budgetYear: null }
     case 'custom':
       return {
         startDate: customStart ?? `${year}-${pad(month)}-01`,
         endDate: customEnd ?? todayStr,
         isCurrentMonth: false,
+        budgetMonth: null,
+        budgetYear: null,
       }
     default: {
       const lastDay = new Date(year, month, 0).getDate()
-      return { startDate: `${year}-${pad(month)}-01`, endDate: `${year}-${pad(month)}-${pad(lastDay)}`, isCurrentMonth: true }
+      return { startDate: `${year}-${pad(month)}-01`, endDate: `${year}-${pad(month)}-${pad(lastDay)}`, isCurrentMonth: true, budgetMonth: month, budgetYear: year }
     }
   }
+}
+
+interface BudgetRow {
+  category_id: string
+  amount_clp: number
+  categories: { name: string; color: string } | null
 }
 
 interface Props {
@@ -50,23 +59,41 @@ interface Props {
 export default async function AnalyticsPage({ searchParams }: Props) {
   const sp = await searchParams
   const period = (sp.period as Period) ?? 'this_month'
-  const { startDate, endDate, isCurrentMonth } = getDateRange(period, sp.start, sp.end)
+  const { startDate, endDate, isCurrentMonth, budgetMonth, budgetYear } = getDateRange(period, sp.start, sp.end)
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const { data: expenses } = await supabase
-    .from('expenses')
-    .select(`id, date, merchant, amount, currency, amount_clp,
-      categories(id, name, color),
-      accounts(id, name, type)`)
-    .eq('user_id', user.id)
-    .gte('date', startDate)
-    .lte('date', endDate)
-    .order('date', { ascending: false })
+  const [expensesResult, budgetsResult] = await Promise.all([
+    supabase
+      .from('expenses')
+      .select(`id, date, merchant, amount, currency, amount_clp,
+        categories(id, name, color),
+        accounts(id, name, type)`)
+      .eq('user_id', user.id)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: false }),
+    budgetMonth && budgetYear
+      ? supabase
+          .from('budgets')
+          .select('category_id, amount_clp, categories(name, color)')
+          .eq('user_id', user.id)
+          .eq('month', budgetMonth)
+          .eq('year', budgetYear)
+      : Promise.resolve({ data: [] }),
+  ])
 
-  const rows = (expenses ?? []) as unknown as ExpenseRow[]
+  const rows = (expensesResult.data ?? []) as unknown as ExpenseRow[]
+  const budgets = (budgetsResult.data ?? []) as unknown as BudgetRow[]
+
+  const spentByCategory: Record<string, number> = {}
+  for (const e of rows) {
+    if (e.categories?.id) {
+      spentByCategory[e.categories.id] = (spentByCategory[e.categories.id] ?? 0) + e.amount_clp
+    }
+  }
 
   return (
     <div>
@@ -77,7 +104,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
 
       <KPICards expenses={rows} />
 
-      {rows.length === 0 ? (
+      {rows.length === 0 && budgets.length === 0 ? (
         <div className="text-center py-16 text-gray-400 mt-6">
           <p className="text-lg">No hay gastos en este período</p>
         </div>
@@ -86,12 +113,21 @@ export default async function AnalyticsPage({ searchParams }: Props) {
           {isCurrentMonth && (
             <MonthlyProjection expenses={rows} startDate={startDate} />
           )}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <CategoryPieChart expenses={rows} />
-            <AccountTypeChart expenses={rows} />
-          </div>
-          <TemporalBarChart expenses={rows} startDate={startDate} endDate={endDate} />
-          <ExpenseDetailTable expenses={rows} />
+
+          {budgetMonth && (
+            <BudgetProgress budgets={budgets} spentByCategory={spentByCategory} />
+          )}
+
+          {rows.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <CategoryPieChart expenses={rows} />
+                <AccountTypeChart expenses={rows} />
+              </div>
+              <TemporalBarChart expenses={rows} startDate={startDate} endDate={endDate} />
+              <ExpenseDetailTable expenses={rows} />
+            </>
+          )}
         </div>
       )}
     </div>
