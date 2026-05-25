@@ -98,14 +98,14 @@ export default async function AnalyticsPage({ searchParams }: Props) {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4">Analytics</h1>
         <PeriodSelector currentPeriod={period} currentStart={sp.start} currentEnd={sp.end} />
       </div>
 
       <KPICards expenses={rows} />
 
       {rows.length === 0 && budgets.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 mt-6">
+        <div className="text-center py-16 text-gray-400 dark:text-slate-500 mt-6">
           <p className="text-lg">No hay gastos en este período</p>
         </div>
       ) : (

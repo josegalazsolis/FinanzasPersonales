@@ -49,10 +49,10 @@ export function KPICards({ expenses }: KPICardsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {cards.map(card => (
-        <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-5">
-          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{card.label}</p>
-          <p className="text-xl font-bold text-gray-900 truncate">{card.value}</p>
-          <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
+        <div key={card.label} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+          <p className="text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wide mb-1">{card.label}</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-slate-100 truncate">{card.value}</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">{card.sub}</p>
         </div>
       ))}
     </div>

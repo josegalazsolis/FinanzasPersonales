@@ -1,8 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
 }
 
 @theme inline {
@@ -28,4 +35,10 @@ input, select, textarea {
   --rdp-today-color: #4f46e5;
   color: #171717;
   background-color: #ffffff;
+}
+
+.dark .rdp-root {
+  --rdp-accent-background-color: #312e81;
+  color: #f8fafc;
+  background-color: #1e293b;
 }

@@ -21,14 +21,14 @@ function statusColor(pct: number) {
 export function BudgetProgress({ budgets, spentByCategory }: BudgetProgressProps) {
   if (budgets.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-base font-semibold text-gray-900">Presupuesto del mes</h2>
+          <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Presupuesto del mes</h2>
           <Link href="/settings/budgets" className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
             Configurar →
           </Link>
         </div>
-        <p className="text-sm text-gray-400 py-4 text-center">
+        <p className="text-sm text-gray-400 dark:text-slate-500 py-4 text-center">
           No hay presupuestos configurados para este mes.
         </p>
       </div>
@@ -36,9 +36,9 @@ export function BudgetProgress({ budgets, spentByCategory }: BudgetProgressProps
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-base font-semibold text-gray-900">Presupuesto del mes</h2>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Presupuesto del mes</h2>
         <Link href="/settings/budgets" className="text-xs text-indigo-600 hover:text-indigo-800 font-medium">
           Editar →
         </Link>
@@ -58,22 +58,22 @@ export function BudgetProgress({ budgets, spentByCategory }: BudgetProgressProps
                     className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                     style={{ backgroundColor: b.categories?.color ?? '#6b7280' }}
                   />
-                  <span className="text-sm text-gray-800 truncate">{b.categories?.name ?? 'Sin nombre'}</span>
+                  <span className="text-sm text-gray-800 dark:text-slate-200 truncate">{b.categories?.name ?? 'Sin nombre'}</span>
                   {pct >= 80 && (
                     <span className={`text-xs px-1.5 py-0.5 rounded border font-medium ${colors.badge}`}>
                       {over ? 'Superado' : `${pct}%`}
                     </span>
                   )}
                 </div>
-                <div className="text-right flex-shrink-0 ml-3 text-xs text-gray-500">
-                  <span className={over ? 'text-red-600 font-semibold' : 'text-gray-700 font-medium'}>
+                <div className="text-right flex-shrink-0 ml-3 text-xs text-gray-500 dark:text-slate-400">
+                  <span className={over ? 'text-red-600 font-semibold' : 'text-gray-700 dark:text-slate-300 font-medium'}>
                     {formatCLP(spent)}
                   </span>
                   {' / '}
                   {formatCLP(b.amount_clp)}
                 </div>
               </div>
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all ${colors.bar}`}
                   style={{ width: `${pct}%` }}

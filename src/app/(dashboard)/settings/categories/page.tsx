@@ -13,7 +13,7 @@ export default async function CategoriesPage() {
 
   return (
     <>
-      <p className="text-gray-500 mb-6">Gestiona las categorías de tus gastos</p>
+      <p className="text-gray-500 dark:text-slate-400 mb-6">Gestiona las categorías de tus gastos</p>
       <CategoriesManager categories={categories ?? []} />
     </>
   )

@@ -87,10 +87,10 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
     const active = sortKey === field
     return (
       <th
-        className="text-left px-4 py-3 cursor-pointer select-none hover:text-gray-900 transition-colors"
+        className="text-left px-4 py-3 cursor-pointer select-none hover:text-gray-900 dark:hover:text-slate-200 transition-colors"
         onClick={() => handleSort(field)}
       >
-        <span className={active ? 'text-indigo-600 font-semibold' : ''}>
+        <span className={active ? 'text-indigo-600 dark:text-indigo-400 font-semibold' : ''}>
           {label}
           {active && <span className="ml-1">{sortDir === 'asc' ? '↑' : '↓'}</span>}
         </span>
@@ -99,9 +99,9 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <h2 className="text-base font-semibold text-gray-900">Detalle de gastos</h2>
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700">
+        <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Detalle de gastos</h2>
         <div className="flex gap-3">
           <button
             onClick={exportCSV}
@@ -119,7 +119,7 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+          <thead className="bg-gray-50 dark:bg-slate-900 text-gray-500 dark:text-slate-400 text-xs uppercase">
             <tr>
               <SortHeader label="Fecha" field="date" />
               <SortHeader label="Comercio" field="merchant" />
@@ -129,13 +129,13 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
               <SortHeader label="CLP" field="amount_clp" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
             {sorted.map(e => {
               const [y, m, d] = e.date.split('-')
               return (
-                <tr key={e.id} className="bg-white hover:bg-gray-50 transition-colors">
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{`${d}/${m}/${y}`}</td>
-                  <td className="px-4 py-3 font-medium text-gray-900">{e.merchant}</td>
+                <tr key={e.id} className="bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                  <td className="px-4 py-3 text-gray-500 dark:text-slate-400 whitespace-nowrap">{`${d}/${m}/${y}`}</td>
+                  <td className="px-4 py-3 font-medium text-gray-900 dark:text-slate-100">{e.merchant}</td>
                   <td className="px-4 py-3">
                     {e.categories && (
                       <span className="inline-flex items-center gap-1.5 text-xs">
@@ -147,13 +147,13 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-gray-500 whitespace-nowrap">
+                  <td className="px-4 py-3 text-gray-500 dark:text-slate-400 whitespace-nowrap">
                     {e.accounts?.name ?? '—'}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-600 whitespace-nowrap">
+                  <td className="px-4 py-3 text-right text-gray-600 dark:text-slate-400 whitespace-nowrap">
                     {e.amount.toLocaleString('es-CL')} {e.currency}
                   </td>
-                  <td className="px-4 py-3 text-right font-medium text-gray-900 whitespace-nowrap">
+                  <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-slate-100 whitespace-nowrap">
                     {formatCLP(e.amount_clp)}
                   </td>
                 </tr>
@@ -162,10 +162,10 @@ export function ExpenseDetailTable({ expenses }: ExpenseDetailTableProps) {
           </tbody>
         </table>
       </div>
-      <div className="px-6 py-3 border-t border-gray-100 flex justify-end">
-        <p className="text-sm text-gray-500">
+      <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-700 flex justify-end">
+        <p className="text-sm text-gray-500 dark:text-slate-400">
           {sorted.length} gasto{sorted.length !== 1 ? 's' : ''} ·{' '}
-          <span className="font-semibold text-gray-900">
+          <span className="font-semibold text-gray-900 dark:text-slate-100">
             {formatCLP(sorted.reduce((s, e) => s + e.amount_clp, 0))}
           </span>
         </p>

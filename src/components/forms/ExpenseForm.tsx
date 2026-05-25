@@ -130,16 +130,16 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
 
       {/* Fecha */}
       <div className="relative">
-        <label className="block text-sm font-medium text-gray-700 mb-1">Fecha</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Fecha</label>
         <button
           type="button"
           onClick={() => setShowCalendar(!showCalendar)}
-          className="w-full text-left border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full text-left border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           📅 {format(date, 'dd/MM/yyyy', { locale: es })}
         </button>
         {showCalendar && (
-          <div className="absolute z-20 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-2">
+          <div className="absolute z-20 mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg p-2">
             <DayPicker
               mode="single"
               selected={date}
@@ -153,24 +153,24 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
 
       {/* Comercio */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Comercio</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Comercio</label>
         <input
           type="text"
           value={merchant}
           onChange={e => setMerchant(e.target.value)}
           placeholder="Ej: Jumbo, Netflix, Shell"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         {errors.merchant && <p className="text-xs text-red-600 mt-1">{errors.merchant}</p>}
       </div>
 
       {/* Categoría */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Categoría</label>
         <select
           value={categoryId}
           onChange={e => setCategoryId(e.target.value)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">Seleccionar categoría...</option>
           {categories.map(cat => (
@@ -182,7 +182,7 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
 
       {/* Valor */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Valor</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Valor</label>
         <input
           type="number"
           value={amount}
@@ -190,18 +190,18 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
           min="0"
           step="any"
           placeholder="0"
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-slate-100 placeholder:text-gray-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         {errors.amount && <p className="text-xs text-red-600 mt-1">{errors.amount}</p>}
       </div>
 
       {/* Moneda */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">Moneda</label>
         <select
           value={currency}
           onChange={e => setCurrency(e.target.value as Currency)}
-          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm text-gray-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           <option value="CLP">CLP</option>
           <option value="USD">USD</option>
@@ -212,14 +212,14 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
 
       {/* Conversión */}
       {currency !== 'CLP' && (
-        <div className="bg-gray-50 rounded-md px-4 py-3 text-sm space-y-1">
+        <div className="bg-gray-50 dark:bg-slate-800 rounded-md px-4 py-3 text-sm space-y-1">
           {isLoadingRate ? (
-            <p className="text-gray-500">Obteniendo tipo de cambio...</p>
+            <p className="text-gray-500 dark:text-slate-400">Obteniendo tipo de cambio...</p>
           ) : exchangeRate ? (
             <>
-              <p className="text-gray-600">1 {currency} = {formatCLP(exchangeRate)}</p>
+              <p className="text-gray-600 dark:text-slate-400">1 {currency} = {formatCLP(exchangeRate)}</p>
               {amountCLP !== null && (
-                <p className="font-medium text-gray-800">Equivalente: {formatCLP(amountCLP)}</p>
+                <p className="font-medium text-gray-800 dark:text-slate-200">Equivalente: {formatCLP(amountCLP)}</p>
               )}
             </>
           ) : (

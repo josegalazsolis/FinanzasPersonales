@@ -10,7 +10,7 @@ export function SignOutButton() {
     router.push('/login')
   }
   return (
-    <button onClick={handleSignOut} className="text-sm text-gray-600 hover:text-gray-900">
+    <button onClick={handleSignOut} className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-100">
       Cerrar sesión
     </button>
   )

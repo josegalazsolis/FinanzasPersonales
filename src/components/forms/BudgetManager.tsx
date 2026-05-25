@@ -87,14 +87,14 @@ export function BudgetManager({ categories, budgets, month, year }: BudgetManage
         <select
           value={month}
           onChange={e => handlePeriodChange(parseInt(e.target.value), year)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm"
         >
           {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
         </select>
         <select
           value={year}
           onChange={e => handlePeriodChange(month, parseInt(e.target.value))}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm"
+          className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm"
         >
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
@@ -118,20 +118,20 @@ export function BudgetManager({ categories, budgets, month, year }: BudgetManage
       )}
 
       {categories.length === 0 ? (
-        <div className="text-center py-12 text-gray-500 bg-white rounded-xl border border-gray-200">
+        <div className="text-center py-12 text-gray-500 dark:text-slate-400 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
           <p className="text-sm">No hay categorías activas. Crea categorías primero.</p>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
             {categories.map(cat => (
               <div key={cat.id} className="flex items-center gap-4 px-4 py-3">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: cat.color }} />
-                  <span className="text-sm text-gray-900 truncate">{cat.name}</span>
+                  <span className="text-sm text-gray-900 dark:text-slate-100 truncate">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-400">$</span>
+                  <span className="text-sm text-gray-400 dark:text-slate-500">$</span>
                   <input
                     type="number"
                     min="0"
@@ -139,7 +139,7 @@ export function BudgetManager({ categories, budgets, month, year }: BudgetManage
                     placeholder="Sin límite"
                     value={amounts[cat.id]}
                     onChange={e => setAmounts(prev => ({ ...prev, [cat.id]: e.target.value }))}
-                    className="w-36 border border-gray-300 rounded-md px-3 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-36 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-1.5 text-sm text-right focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -147,9 +147,9 @@ export function BudgetManager({ categories, budgets, month, year }: BudgetManage
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-slate-400">
               Total presupuestado:{' '}
-              <span className="font-semibold text-gray-900">{total > 0 ? formatCLP(total) : '—'}</span>
+              <span className="font-semibold text-gray-900 dark:text-slate-100">{total > 0 ? formatCLP(total) : '—'}</span>
             </p>
             <button
               onClick={handleSave}

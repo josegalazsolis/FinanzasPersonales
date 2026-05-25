@@ -1,6 +1,7 @@
 'use client'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatCLP } from '@/lib/utils/currency'
+import { useTheme } from '@/components/providers/ThemeProvider'
 import type { ExpenseRow } from './types'
 
 interface TemporalBarChartProps {
@@ -76,14 +77,18 @@ function buildMonthlyData(expenses: ExpenseRow[]) {
 function CustomTooltip({ active, payload, label }: { active?: boolean; payload?: { value: number }[]; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-sm">
-      <p className="text-gray-500 mb-0.5">{label}</p>
-      <p className="font-semibold text-gray-900">{formatCLP(payload[0].value)}</p>
+    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+      <p className="text-gray-500 dark:text-slate-400 mb-0.5">{label}</p>
+      <p className="font-semibold text-gray-900 dark:text-slate-100">{formatCLP(payload[0].value)}</p>
     </div>
   )
 }
 
 export function TemporalBarChart({ expenses, startDate, endDate }: TemporalBarChartProps) {
+  const { theme } = useTheme()
+  const tickFill = theme === 'dark' ? '#94a3b8' : '#9ca3af'
+  const gridStroke = theme === 'dark' ? '#334155' : '#f3f4f6'
+
   const days = daysBetween(startDate, endDate)
 
   let data: { label: string; total: number }[]
@@ -101,22 +106,22 @@ export function TemporalBarChart({ expenses, startDate, endDate }: TemporalBarCh
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-semibold text-gray-900">Evolución temporal</h2>
-        <span className="text-xs text-gray-400">{subtitle}</span>
+        <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">Evolución temporal</h2>
+        <span className="text-xs text-gray-400 dark:text-slate-500">{subtitle}</span>
       </div>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={data} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: tickFill }}
             interval="preserveStartEnd"
           />
           <YAxis
             tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-            tick={{ fontSize: 11, fill: '#9ca3af' }}
+            tick={{ fontSize: 11, fill: tickFill }}
             width={55}
           />
           <Tooltip content={<CustomTooltip />} />

@@ -1,6 +1,7 @@
 'use client'
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { formatCLP } from '@/lib/utils/currency'
+import { useTheme } from '@/components/providers/ThemeProvider'
 import type { ExpenseRow } from './types'
 
 interface CategoryPieChartProps {
@@ -15,16 +16,18 @@ interface TooltipPayload {
 function CustomTooltip({ active, payload }: { active?: boolean; payload?: TooltipPayload[] }) {
   if (!active || !payload?.length) return null
   const { name, value } = payload[0]
-  const total = payload[0] as unknown as { payload: { total: number; percent: number } }
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-3 py-2 text-sm">
-      <p className="font-medium text-gray-900">{name}</p>
-      <p className="text-gray-600">{formatCLP(value)}</p>
+    <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg px-3 py-2 text-sm">
+      <p className="font-medium text-gray-900 dark:text-slate-100">{name}</p>
+      <p className="text-gray-600 dark:text-slate-400">{formatCLP(value)}</p>
     </div>
   )
 }
 
 export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
+  const { theme } = useTheme()
+  const legendColor = theme === 'dark' ? '#94a3b8' : '#374151'
+
   const categoryMap = new Map<string, { name: string; color: string; value: number }>()
 
   for (const e of expenses) {
@@ -42,10 +45,10 @@ export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
   const total = data.reduce((sum, d) => sum + d.value, 0)
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <h2 className="text-base font-semibold text-gray-900 mb-4">Gastos por categoría</h2>
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
+      <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100 mb-4">Gastos por categoría</h2>
       {data.length === 0 ? (
-        <p className="text-gray-400 text-sm text-center py-12">Sin datos</p>
+        <p className="text-gray-400 dark:text-slate-500 text-sm text-center py-12">Sin datos</p>
       ) : (
         <>
           <ResponsiveContainer width="100%" height={260}>
@@ -67,7 +70,7 @@ export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
               <Tooltip content={<CustomTooltip />} />
               <Legend
                 formatter={(value) => (
-                  <span className="text-xs text-gray-700">{value}</span>
+                  <span style={{ fontSize: 12, color: legendColor }}>{value}</span>
                 )}
               />
             </PieChart>
@@ -80,11 +83,11 @@ export function CategoryPieChart({ expenses }: CategoryPieChartProps) {
                     className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                     style={{ backgroundColor: item.color }}
                   />
-                  <span className="text-gray-700 truncate">{item.name}</span>
+                  <span className="text-gray-700 dark:text-slate-300 truncate">{item.name}</span>
                 </div>
                 <div className="text-right flex-shrink-0 ml-3">
-                  <span className="font-medium text-gray-900">{formatCLP(item.value)}</span>
-                  <span className="text-gray-400 ml-2 text-xs">
+                  <span className="font-medium text-gray-900 dark:text-slate-100">{formatCLP(item.value)}</span>
+                  <span className="text-gray-400 dark:text-slate-500 ml-2 text-xs">
                     {total > 0 ? Math.round((item.value / total) * 100) : 0}%
                   </span>
                 </div>

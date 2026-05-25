@@ -46,7 +46,7 @@ export function PeriodSelector({ currentPeriod, currentStart, currentEnd }: Peri
             className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
               currentPeriod === p.key
                 ? 'bg-indigo-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                : 'bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700'
             }`}
           >
             {p.label}
@@ -60,14 +60,14 @@ export function PeriodSelector({ currentPeriod, currentStart, currentEnd }: Peri
             type="date"
             value={customStart}
             onChange={e => setCustomStart(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-1.5 text-sm"
           />
-          <span className="text-gray-400">—</span>
+          <span className="text-gray-400 dark:text-slate-500">—</span>
           <input
             type="date"
             value={customEnd}
             onChange={e => setCustomEnd(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 text-sm"
+            className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-1.5 text-sm"
           />
           <button
             onClick={applyCustom}

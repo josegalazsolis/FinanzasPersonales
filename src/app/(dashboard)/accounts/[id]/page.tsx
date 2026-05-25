@@ -45,12 +45,12 @@ export default async function AccountPage({ params, searchParams }: Props) {
   return (
     <div>
       <div className="flex items-center gap-4 mb-2">
-        <Link href="/dashboard" className="text-gray-400 hover:text-gray-700 text-sm">← Mis cuentas</Link>
+        <Link href="/dashboard" className="text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 text-sm">← Mis cuentas</Link>
       </div>
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">{account.name}</h1>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-slate-400">
             {account.type === 'cuenta_corriente' ? 'Cuenta Corriente' : 'Tarjeta de Crédito'}
           </span>
         </div>

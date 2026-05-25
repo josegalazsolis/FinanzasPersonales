@@ -91,7 +91,7 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
         <select
           value={currentMonth}
           onChange={e => handlePeriodChange(parseInt(e.target.value), currentYear)}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           {MONTHS.map((m, i) => (
             <option key={i} value={i + 1}>{m}</option>
@@ -100,14 +100,14 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
         <select
           value={currentYear}
           onChange={e => handlePeriodChange(currentMonth, parseInt(e.target.value))}
-          className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         >
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
       </div>
 
       {expenses.length === 0 ? (
-        <div className="text-center py-16 text-gray-500">
+        <div className="text-center py-16 text-gray-500 dark:text-slate-400">
           <p className="text-lg mb-4">No hay gastos en este período</p>
           <Link
             href={`/accounts/${accountId}/expenses/new`}
@@ -118,9 +118,9 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <div className="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-gray-600 text-xs uppercase">
+              <thead className="bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-slate-400 text-xs uppercase">
                 <tr>
                   <th className="text-left px-4 py-3">Fecha</th>
                   <th className="text-left px-4 py-3">Comercio</th>
@@ -130,14 +130,14 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
                   <th className="text-center px-4 py-3">Acciones</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                 {expenses.map(expense => {
                   const [y, m, d] = expense.date.split('-')
                   const dateStr = `${d}/${m}/${y}`
                   return (
-                    <tr key={expense.id} className="bg-white hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{dateStr}</td>
-                      <td className="px-4 py-3 font-medium text-gray-900">{expense.merchant}</td>
+                    <tr key={expense.id} className="bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors">
+                      <td className="px-4 py-3 text-gray-600 dark:text-slate-400 whitespace-nowrap">{dateStr}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900 dark:text-slate-100">{expense.merchant}</td>
                       <td className="px-4 py-3">
                         {expense.categories && (
                           <span className="inline-flex items-center gap-1.5 text-xs">
@@ -149,7 +149,7 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-700 whitespace-nowrap">
+                      <td className="px-4 py-3 text-right text-gray-700 dark:text-slate-300 whitespace-nowrap">
                         {expense.amount.toLocaleString('es-CL')} {expense.currency}
                       </td>
                       <td className="px-4 py-3 text-right font-medium whitespace-nowrap">
@@ -185,9 +185,9 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
               <button onClick={exportCSV} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">CSV</button>
               <button onClick={exportExcel} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">Excel</button>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-slate-400">
               Total del período:{' '}
-              <span className="font-bold text-gray-900 text-base">{formatCLP(total)}</span>
+              <span className="font-bold text-gray-900 dark:text-slate-100 text-base">{formatCLP(total)}</span>
             </p>
           </div>
         </>
@@ -196,13 +196,13 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
       {/* Modal de eliminación */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h2 className="text-lg font-semibold mb-2">¿Eliminar este gasto?</h2>
-            <p className="text-sm text-gray-600 mb-6">Esta acción no se puede deshacer.</p>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 w-full max-w-sm mx-4">
+            <h2 className="text-lg font-semibold mb-2 dark:text-slate-100">¿Eliminar este gasto?</h2>
+            <p className="text-sm text-gray-600 dark:text-slate-400 mb-6">Esta acción no se puede deshacer.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
-                className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
+                className="flex-1 border border-gray-300 dark:border-slate-600 text-gray-700 dark:text-slate-300 py-2 rounded-md text-sm font-medium hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
               >
                 Cancelar
               </button>
