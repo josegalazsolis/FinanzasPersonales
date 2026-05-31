@@ -11,17 +11,25 @@ export default async function DashboardPage() {
 
   const { data: accounts } = await supabase
     .from('accounts')
-    .select(`id, name, type, expenses(amount_clp, date)`)
+    .select(`id, name, type, expenses(amount_clp, date), incomes(amount_clp, date)`)
     .eq('user_id', user!.id)
     .order('created_at', { ascending: true })
 
-  const accountsWithTotals = (accounts ?? []).map(account => ({
-    ...account,
-    monthlyTotal: (account.expenses as { amount_clp: number; date: string }[])
+  const accountsWithTotals = (accounts ?? []).map(account => {
+    const monthlyExpenses = (account.expenses as { amount_clp: number; date: string }[])
       .filter(e => e.date >= firstDayOfMonth)
-      .reduce((sum, e) => sum + e.amount_clp, 0),
-    expenses: undefined,
-  }))
+      .reduce((sum, e) => sum + e.amount_clp, 0)
+    const monthlyIncome = (account.incomes as { amount_clp: number; date: string }[])
+      .filter(i => i.date >= firstDayOfMonth)
+      .reduce((sum, i) => sum + i.amount_clp, 0)
+    return {
+      ...account,
+      monthlyTotal: monthlyExpenses,
+      monthlyIncome,
+      expenses: undefined,
+      incomes: undefined,
+    }
+  })
 
   return (
     <div>

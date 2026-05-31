@@ -105,6 +105,63 @@ export type Database = {
         }
         Relationships: []
       }
+      incomes: {
+        Row: {
+          account_id: string
+          amount: number
+          amount_clp: number
+          created_at: string
+          currency: string
+          date: string
+          exchange_rate_used: number
+          id: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          amount_clp: number
+          created_at?: string
+          currency?: string
+          date: string
+          exchange_rate_used?: number
+          id?: string
+          source: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          amount_clp?: number
+          created_at?: string
+          currency?: string
+          date?: string
+          exchange_rate_used?: number
+          id?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incomes_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incomes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           account_id: string

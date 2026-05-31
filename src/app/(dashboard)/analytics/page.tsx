@@ -4,11 +4,12 @@ import { PeriodSelector } from '@/components/analytics/PeriodSelector'
 import { KPICards } from '@/components/analytics/KPICards'
 import { CategoryPieChart } from '@/components/analytics/CategoryPieChart'
 import { TemporalBarChart } from '@/components/analytics/TemporalBarChart'
+import { NetFlowChart } from '@/components/analytics/NetFlowChart'
 import { AccountTypeChart } from '@/components/analytics/AccountTypeChart'
 import { MonthlyProjection } from '@/components/analytics/MonthlyProjection'
 import { BudgetProgress } from '@/components/analytics/BudgetProgress'
 import { ExpenseDetailTable } from '@/components/analytics/ExpenseDetailTable'
-import type { ExpenseRow, Period } from '@/components/analytics/types'
+import type { ExpenseRow, IncomeRow, Period } from '@/components/analytics/types'
 
 function getDateRange(period: Period, customStart?: string, customEnd?: string) {
   const now = new Date()
@@ -65,12 +66,19 @@ export default async function AnalyticsPage({ searchParams }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [expensesResult, budgetsResult] = await Promise.all([
+  const [expensesResult, incomesResult, budgetsResult] = await Promise.all([
     supabase
       .from('expenses')
       .select(`id, date, merchant, amount, currency, amount_clp,
         categories(id, name, color),
         accounts(id, name, type)`)
+      .eq('user_id', user.id)
+      .gte('date', startDate)
+      .lte('date', endDate)
+      .order('date', { ascending: false }),
+    supabase
+      .from('incomes')
+      .select(`id, date, source, amount, currency, amount_clp`)
       .eq('user_id', user.id)
       .gte('date', startDate)
       .lte('date', endDate)
@@ -86,6 +94,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
   ])
 
   const rows = (expensesResult.data ?? []) as unknown as ExpenseRow[]
+  const incomeRows = (incomesResult.data ?? []) as unknown as IncomeRow[]
   const budgets = (budgetsResult.data ?? []) as unknown as BudgetRow[]
 
   const spentByCategory: Record<string, number> = {}
@@ -95,6 +104,8 @@ export default async function AnalyticsPage({ searchParams }: Props) {
     }
   }
 
+  const hasData = rows.length > 0 || incomeRows.length > 0 || budgets.length > 0
+
   return (
     <div>
       <div className="mb-6">
@@ -102,11 +113,11 @@ export default async function AnalyticsPage({ searchParams }: Props) {
         <PeriodSelector currentPeriod={period} currentStart={sp.start} currentEnd={sp.end} />
       </div>
 
-      <KPICards expenses={rows} />
+      <KPICards expenses={rows} incomes={incomeRows} />
 
-      {rows.length === 0 && budgets.length === 0 ? (
+      {!hasData ? (
         <div className="text-center py-16 text-gray-400 dark:text-slate-500 mt-6">
-          <p className="text-lg">No hay gastos en este período</p>
+          <p className="text-lg">No hay datos en este período</p>
         </div>
       ) : (
         <div className="space-y-6 mt-6">
@@ -117,6 +128,8 @@ export default async function AnalyticsPage({ searchParams }: Props) {
           {budgetMonth && (
             <BudgetProgress budgets={budgets} spentByCategory={spentByCategory} />
           )}
+
+          <NetFlowChart expenses={rows} incomes={incomeRows} startDate={startDate} endDate={endDate} />
 
           {rows.length > 0 && (
             <>

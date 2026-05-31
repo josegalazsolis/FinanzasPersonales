@@ -9,4 +9,13 @@ export interface ExpenseRow {
   accounts: { id: string; name: string; type: string } | null
 }
 
+export interface IncomeRow {
+  id: string
+  date: string
+  source: string
+  amount: number
+  currency: string
+  amount_clp: number
+}
+
 export type Period = 'this_month' | 'last_month' | '3_months' | 'this_year' | 'custom'
