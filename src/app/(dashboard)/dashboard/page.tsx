@@ -1,8 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { AccountCard } from '@/components/ui/AccountCard'
 import { CreateAccountModal } from '@/components/forms/CreateAccountModal'
+import { applyRecurringExpenses } from './actions'
 
 export default async function DashboardPage() {
+  await applyRecurringExpenses()
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
