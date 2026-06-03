@@ -33,17 +33,44 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
   const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [categoryFilter, setCategoryFilter] = useState('')
+  const [minAmount, setMinAmount] = useState('')
+  const [maxAmount, setMaxAmount] = useState('')
 
   const now = new Date()
   const years = [now.getFullYear(), now.getFullYear() - 1, now.getFullYear() - 2]
+
+  const uniqueCategories = Array.from(
+    new Map(
+      expenses
+        .filter(e => e.categories)
+        .map(e => [e.categories!.id, e.categories!])
+    ).values()
+  ).sort((a, b) => a.name.localeCompare(b.name))
+
+  const filteredExpenses = expenses.filter(e => {
+    if (categoryFilter && e.categories?.id !== categoryFilter) return false
+    if (minAmount && e.amount_clp < parseFloat(minAmount)) return false
+    if (maxAmount && e.amount_clp > parseFloat(maxAmount)) return false
+    return true
+  })
+
+  const filteredTotal = filteredExpenses.reduce((s, e) => s + e.amount_clp, 0)
+  const isFiltered = categoryFilter !== '' || minAmount !== '' || maxAmount !== ''
 
   function handlePeriodChange(month: number, year: number) {
     router.push(`/accounts/${accountId}?month=${month}&year=${year}`)
   }
 
+  function clearFilters() {
+    setCategoryFilter('')
+    setMinAmount('')
+    setMaxAmount('')
+  }
+
   function exportCSV() {
     const header = 'Fecha,Comercio,Categoría,Monto Original,Moneda,Monto CLP'
-    const rows = expenses.map(e => [
+    const rows = filteredExpenses.map(e => [
       e.date,
       `"${e.merchant}"`,
       `"${e.categories?.name ?? ''}"`,
@@ -62,7 +89,7 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
   }
 
   function exportExcel() {
-    const rows = expenses.map(e => ({
+    const rows = filteredExpenses.map(e => ({
       Fecha: e.date,
       Comercio: e.merchant,
       Categoría: e.categories?.name ?? '',
@@ -87,7 +114,7 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
   return (
     <div>
       {/* Selector de período */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-3">
         <select
           value={currentMonth}
           onChange={e => handlePeriodChange(parseInt(e.target.value), currentYear)}
@@ -106,6 +133,53 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
         </select>
       </div>
 
+      {/* Filtros avanzados */}
+      <div className="flex flex-wrap gap-2 mb-5 items-center">
+        <select
+          value={categoryFilter}
+          onChange={e => setCategoryFilter(e.target.value)}
+          className="border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        >
+          <option value="">Todas las categorías</option>
+          {uniqueCategories.map(c => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </select>
+        <div className="flex items-center gap-1">
+          <span className="text-xs text-gray-400 dark:text-slate-500">$</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="Mín"
+            value={minAmount}
+            onChange={e => setMinAmount(e.target.value)}
+            className="w-24 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <span className="text-xs text-gray-400 dark:text-slate-500">—</span>
+          <input
+            type="number"
+            min="0"
+            placeholder="Máx"
+            value={maxAmount}
+            onChange={e => setMaxAmount(e.target.value)}
+            className="w-24 border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        {isFiltered && (
+          <button
+            onClick={clearFilters}
+            className="text-xs text-gray-400 dark:text-slate-500 hover:text-gray-700 dark:hover:text-slate-300 underline transition-colors"
+          >
+            Limpiar filtros
+          </button>
+        )}
+        {isFiltered && (
+          <span className="text-xs text-gray-400 dark:text-slate-500 ml-auto">
+            {filteredExpenses.length} de {expenses.length} gastos
+          </span>
+        )}
+      </div>
+
       {expenses.length === 0 ? (
         <div className="text-center py-16 text-gray-500 dark:text-slate-400">
           <p className="text-lg mb-4">No hay gastos en este período</p>
@@ -115,6 +189,13 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
           >
             + Nuevo gasto
           </Link>
+        </div>
+      ) : filteredExpenses.length === 0 ? (
+        <div className="text-center py-12 text-gray-400 dark:text-slate-500 border border-gray-200 dark:border-slate-700 rounded-xl">
+          <p className="text-sm">No hay gastos con los filtros seleccionados</p>
+          <button onClick={clearFilters} className="mt-2 text-sm text-indigo-600 dark:text-indigo-400 hover:underline">
+            Limpiar filtros
+          </button>
         </div>
       ) : (
         <>
@@ -131,7 +212,7 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
-                {expenses.map(expense => {
+                {filteredExpenses.map(expense => {
                   const [y, m, d] = expense.date.split('-')
                   const dateStr = `${d}/${m}/${y}`
                   return (
@@ -186,8 +267,8 @@ export function ExpenseTable({ expenses, accountId, total, currentMonth, current
               <button onClick={exportExcel} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors">Excel</button>
             </div>
             <p className="text-sm text-gray-600 dark:text-slate-400">
-              Total del período:{' '}
-              <span className="font-bold text-gray-900 dark:text-slate-100 text-base">{formatCLP(total)}</span>
+              {isFiltered ? 'Total filtrado' : 'Total del período'}:{' '}
+              <span className="font-bold text-gray-900 dark:text-slate-100 text-base">{formatCLP(isFiltered ? filteredTotal : total)}</span>
             </p>
           </div>
         </>
