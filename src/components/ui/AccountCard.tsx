@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatCLP } from '@/lib/utils/currency'
 import { updateAccount, deleteAccount } from '@/app/(dashboard)/dashboard/actions'
+import { createClient } from '@/lib/supabase/client'
 
 interface Account {
   id: string
@@ -23,6 +24,14 @@ export function AccountCard({ account }: { account: Account }) {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [deletePassword, setDeletePassword] = useState('')
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  function openDeleteModal() {
+    setDeletePassword('')
+    setDeleteError(null)
+    setDeleteOpen(true)
+  }
 
   async function handleEdit() {
     setSaving(true)
@@ -35,7 +44,25 @@ export function AccountCard({ account }: { account: Account }) {
   }
 
   async function handleDelete() {
+    if (!deletePassword) { setDeleteError('Ingresa tu contraseña para confirmar'); return }
     setDeleting(true)
+    setDeleteError(null)
+
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.email) { setDeleteError('No se pudo obtener el usuario'); setDeleting(false); return }
+
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: deletePassword,
+    })
+
+    if (authError) {
+      setDeleteError('Contraseña incorrecta')
+      setDeleting(false)
+      return
+    }
+
     await deleteAccount(account.id)
     setDeleting(false)
     setDeleteOpen(false)
@@ -68,7 +95,7 @@ export function AccountCard({ account }: { account: Account }) {
               </svg>
             </button>
             <button
-              onClick={e => { e.stopPropagation(); setDeleteOpen(true) }}
+              onClick={e => { e.stopPropagation(); openDeleteModal() }}
               className="p-1 rounded text-gray-400 dark:text-slate-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
               title="Eliminar cuenta"
             >
@@ -149,9 +176,26 @@ export function AccountCard({ account }: { account: Account }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setDeleteOpen(false)}>
           <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl p-6 w-full max-w-sm mx-4" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-semibold mb-2 dark:text-slate-100">¿Eliminar "{account.name}"?</h2>
-            <p className="text-sm text-gray-600 dark:text-slate-400 mb-6">
-              Se eliminarán también todos los gastos e ingresos asociados. Esta acción no se puede deshacer.
+            <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
+              Se eliminarán todos los gastos e ingresos asociados. Esta acción no se puede deshacer.
             </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-1">
+                Ingresa tu contraseña para confirmar
+              </label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={e => { setDeletePassword(e.target.value); setDeleteError(null) }}
+                onKeyDown={e => e.key === 'Enter' && handleDelete()}
+                placeholder="Tu contraseña"
+                autoFocus
+                className="w-full border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+              {deleteError && (
+                <p className="text-sm text-red-600 dark:text-red-400 mt-1">{deleteError}</p>
+              )}
+            </div>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteOpen(false)}
@@ -164,7 +208,7 @@ export function AccountCard({ account }: { account: Account }) {
                 disabled={deleting}
                 className="flex-1 bg-red-600 text-white py-2 rounded-md text-sm font-medium hover:bg-red-700 disabled:opacity-60 transition-colors"
               >
-                {deleting ? 'Eliminando...' : 'Eliminar'}
+                {deleting ? 'Verificando...' : 'Eliminar'}
               </button>
             </div>
           </div>
