@@ -52,6 +52,41 @@ export async function applyRecurringExpenses() {
     .eq('user_id', user.id)
 }
 
+export async function updateAccount(accountId: string, name: string, type: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const trimmed = name.trim()
+  if (!trimmed) return { error: 'El nombre es requerido' }
+
+  const { error } = await supabase
+    .from('accounts')
+    .update({ name: trimmed, type })
+    .eq('id', accountId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
+export async function deleteAccount(accountId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+
+  const { error } = await supabase
+    .from('accounts')
+    .delete()
+    .eq('id', accountId)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/dashboard')
+  return { success: true }
+}
+
 export async function createAccount(
   _prevState: { error: string } | null,
   formData: FormData
