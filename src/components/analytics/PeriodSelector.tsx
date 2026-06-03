@@ -15,24 +15,32 @@ interface PeriodSelectorProps {
   currentPeriod: Period
   currentStart?: string
   currentEnd?: string
+  currentAccount?: string
 }
 
-export function PeriodSelector({ currentPeriod, currentStart, currentEnd }: PeriodSelectorProps) {
+export function PeriodSelector({ currentPeriod, currentStart, currentEnd, currentAccount }: PeriodSelectorProps) {
   const router = useRouter()
   const [customStart, setCustomStart] = useState(currentStart ?? '')
   const [customEnd, setCustomEnd] = useState(currentEnd ?? '')
 
-  function selectPeriod(period: Period) {
-    if (period !== 'custom') {
-      router.push(`/analytics?period=${period}`)
-    } else {
-      router.push('/analytics?period=custom')
+  function buildUrl(period: Period, start?: string, end?: string) {
+    const params = new URLSearchParams()
+    params.set('period', period)
+    if (period === 'custom' && start && end) {
+      params.set('start', start)
+      params.set('end', end)
     }
+    if (currentAccount) params.set('account', currentAccount)
+    return `/analytics?${params.toString()}`
+  }
+
+  function selectPeriod(period: Period) {
+    router.push(buildUrl(period))
   }
 
   function applyCustom() {
     if (customStart && customEnd) {
-      router.push(`/analytics?period=custom&start=${customStart}&end=${customEnd}`)
+      router.push(buildUrl('custom', customStart, customEnd))
     }
   }
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { PeriodSelector } from '@/components/analytics/PeriodSelector'
+import { AccountSelector } from '@/components/analytics/AccountSelector'
 import { KPICards } from '@/components/analytics/KPICards'
 import { CategoryPieChart } from '@/components/analytics/CategoryPieChart'
 import { TemporalBarChart } from '@/components/analytics/TemporalBarChart'
@@ -54,35 +55,53 @@ interface BudgetRow {
 }
 
 interface Props {
-  searchParams: Promise<{ period?: string; start?: string; end?: string }>
+  searchParams: Promise<{ period?: string; start?: string; end?: string; account?: string }>
 }
 
 export default async function AnalyticsPage({ searchParams }: Props) {
   const sp = await searchParams
   const period = (sp.period as Period) ?? 'this_month'
+  const currentAccount = sp.account
   const { startDate, endDate, isCurrentMonth, budgetMonth, budgetYear } = getDateRange(period, sp.start, sp.end)
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const accountsResult = await supabase
+    .from('accounts')
+    .select('id, name, type')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true })
+
+  const accounts = accountsResult.data ?? []
+
+  let expensesQuery = supabase
+    .from('expenses')
+    .select(`id, date, merchant, amount, currency, amount_clp,
+      categories(id, name, color),
+      accounts(id, name, type)`)
+    .eq('user_id', user.id)
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: false })
+
+  let incomesQuery = supabase
+    .from('incomes')
+    .select(`id, date, source, amount, currency, amount_clp`)
+    .eq('user_id', user.id)
+    .gte('date', startDate)
+    .lte('date', endDate)
+    .order('date', { ascending: false })
+
+  if (currentAccount) {
+    expensesQuery = expensesQuery.eq('account_id', currentAccount)
+    incomesQuery = incomesQuery.eq('account_id', currentAccount)
+  }
+
   const [expensesResult, incomesResult, budgetsResult] = await Promise.all([
-    supabase
-      .from('expenses')
-      .select(`id, date, merchant, amount, currency, amount_clp,
-        categories(id, name, color),
-        accounts(id, name, type)`)
-      .eq('user_id', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: false }),
-    supabase
-      .from('incomes')
-      .select(`id, date, source, amount, currency, amount_clp`)
-      .eq('user_id', user.id)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: false }),
+    expensesQuery,
+    incomesQuery,
     budgetMonth && budgetYear
       ? supabase
           .from('budgets')
@@ -106,11 +125,31 @@ export default async function AnalyticsPage({ searchParams }: Props) {
 
   const hasData = rows.length > 0 || incomeRows.length > 0 || budgets.length > 0
 
+  const selectedAccount = accounts.find(a => a.id === currentAccount)
+
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4">Analytics</h1>
-        <PeriodSelector currentPeriod={period} currentStart={sp.start} currentEnd={sp.end} />
+        <div className="flex items-center gap-3 mb-4">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-slate-100">Analytics</h1>
+          {selectedAccount && (
+            <span className="text-sm font-medium bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-full">
+              {selectedAccount.name}
+            </span>
+          )}
+        </div>
+        <div className="space-y-3">
+          <PeriodSelector currentPeriod={period} currentStart={sp.start} currentEnd={sp.end} currentAccount={currentAccount} />
+          {accounts.length > 1 && (
+            <AccountSelector
+              accounts={accounts}
+              currentAccount={currentAccount}
+              currentPeriod={period}
+              currentStart={sp.start}
+              currentEnd={sp.end}
+            />
+          )}
+        </div>
       </div>
 
       <KPICards expenses={rows} incomes={incomeRows} />
@@ -135,7 +174,7 @@ export default async function AnalyticsPage({ searchParams }: Props) {
             <>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <CategoryPieChart expenses={rows} />
-                <AccountTypeChart expenses={rows} />
+                {!currentAccount && <AccountTypeChart expenses={rows} />}
               </div>
               <TemporalBarChart expenses={rows} startDate={startDate} endDate={endDate} />
               <ExpenseDetailTable expenses={rows} />
