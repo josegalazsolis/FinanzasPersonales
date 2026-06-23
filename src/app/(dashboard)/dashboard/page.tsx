@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { AccountCard } from '@/components/ui/AccountCard'
 import { CreateAccountModal } from '@/components/forms/CreateAccountModal'
+import { QuickExpenseModal } from '@/components/forms/QuickExpenseModal'
 import { applyRecurringExpenses } from './actions'
 import { formatCLP } from '@/lib/utils/currency'
 
@@ -17,7 +18,7 @@ export default async function DashboardPage() {
   const currentYear = now.getFullYear()
   const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`
 
-  const [{ data: accounts }, { data: monthExpenses }, { data: monthBudgets }] = await Promise.all([
+  const [{ data: accounts }, { data: monthExpenses }, { data: monthBudgets }, { data: categories }] = await Promise.all([
     supabase
       .from('accounts')
       .select(`id, name, type, expenses(amount_clp, date), incomes(amount_clp, date)`)
@@ -34,6 +35,11 @@ export default async function DashboardPage() {
       .eq('user_id', user!.id)
       .eq('month', currentMonth)
       .eq('year', currentYear),
+    supabase
+      .from('categories')
+      .select('id, name, color')
+      .eq('user_id', user!.id)
+      .order('name', { ascending: true }),
   ])
 
   const accountsWithTotals = (accounts ?? []).map(account => {
@@ -162,6 +168,11 @@ export default async function DashboardPage() {
           ))}
         </div>
       )}
+
+      <QuickExpenseModal
+        accounts={(accounts ?? []).map(a => ({ id: a.id, name: a.name }))}
+        categories={categories ?? []}
+      />
     </div>
   )
 }

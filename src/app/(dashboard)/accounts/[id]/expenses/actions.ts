@@ -32,6 +32,7 @@ export async function createExpense(data: ExpenseData) {
 
   if (error) return { error: error.message }
   revalidatePath(`/accounts/${data.accountId}`)
+  revalidatePath('/dashboard')
   return { success: true }
 }
 
