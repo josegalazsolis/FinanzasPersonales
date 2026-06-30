@@ -144,7 +144,6 @@ export function ExpenseForm({ accountId, categories, initialValues }: ExpenseFor
               mode="single"
               selected={date}
               onSelect={(d) => { if (d) { setDate(d); setShowCalendar(false) } }}
-              disabled={{ after: new Date() }}
               locale={es}
             />
           </div>

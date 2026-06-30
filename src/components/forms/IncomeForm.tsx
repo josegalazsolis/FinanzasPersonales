@@ -132,7 +132,7 @@ export function IncomeForm({ accountId, initialValues }: IncomeFormProps) {
               mode="single"
               selected={date}
               onSelect={(d) => { if (d) { setDate(d); setShowCalendar(false) } }}
-              disabled={{ after: new Date() }}
+
               locale={es}
             />
           </div>
